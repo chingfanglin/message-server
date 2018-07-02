@@ -131,8 +131,7 @@ exports.createUser = function(username, password, email, callback) {
 exports.login = function(username, password, callback) {
   getClient(function(client, callback) {
     var hashedPassword = passwordHash.generate(password)
-    console.log(password, hashedPassword)
-
+    console.log(hashedPassword)
     client.query(
       'SELECT id, password, mfa_secret, status FROM users WHERE lower(username) = lower($1)',
       [username],
@@ -146,14 +145,20 @@ exports.login = function(username, password, callback) {
         if (!verified) return callback('WRONG_PASSWORD', user.id)
 
         const secret = speakeasy.generateSecret()
+        const secret_key = config.SECRET_KEY
         const payload = {
-          user_id: user.id,
-          user_name: user.username,
-          user_mail: user.email
+          user_id: user.id
         }
-        const token = jwt.sign(payload, secret.base32, {
+        const token = jwt.sign(payload, secret_key, {
           expiresIn: '1d' //秒到期时间
         })
+
+        try {
+          decoded = jwt.verify(token, secret_key)
+          console.log(token, secret_key, decoded)
+        } catch (e) {
+          return res.status(401).send('unauthorized')
+        }
 
         client.query(
           'UPDATE users SET mfa_secret = $1 WHERE id = $2',
@@ -178,6 +183,26 @@ exports.getUserById = function(username, callback) {
 
         var user = data.rows[0]
         return callback(null, user)
+      }
+    )
+  }, callback)
+}
+
+//搜尋使用者所有頻道
+exports.getUserChannel = function(user_id, callback) {
+  getClient(function(client, callback) {
+    client.query(
+      `SELECT c.*, array_to_json(array_agg(row_to_json(u.*))) AS users  
+      FROM channel c 
+      JOIN (SELECT id AS id, username FROM users) u ON U.id = ANY (c.users::int[])
+      WHERE $1 = ANY(c.users::int[])
+      GROUP BY c.Id`,
+      [user_id],
+      function(err, data) {
+        if (data.rows.length > 0) {
+          var channel = data.rows
+          return callback(null, channel)
+        }
       }
     )
   }, callback)

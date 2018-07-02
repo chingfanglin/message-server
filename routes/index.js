@@ -9,6 +9,8 @@ const chatController = require('../controllers/chatController')
 router.post('/login', authController.login)
 router.post('/registered', authController.createUser)
 router.post('/joinChannel', channelController.joinChannel)
+router.get('/getUserChannel', channelController.getUserChannel)
+
 router.post('/sendMessage', chatController.sendMessage)
 router.post('/addFriends', usersController.addFriends)
 router.post('/delFriends', usersController.delFriends)

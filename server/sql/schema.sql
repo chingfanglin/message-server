@@ -49,12 +49,23 @@ CREATE INDEX transfer_to_user_id_idx ON friends USING btree (to_user_id, created
 
 
 -- Channel 
-CREATE TABLE channel (
-  id uuid NOT NULL PRIMARY KEY,
-  name text NOT NULL,
-  users text [] NOT NULL,
-  created timestamp with time zone DEFAULT now() NOT NULL
-);
+CREATE TABLE public.channel
+(
+    id uuid NOT NULL,
+    name text COLLATE pg_catalog."default" NOT NULL,
+    users text[] COLLATE pg_catalog."default" NOT NULL,
+    created timestamp with time zone NOT NULL DEFAULT now(),
+    content text COLLATE pg_catalog."default",
+    lastupdatetime time with time zone NOT NULL DEFAULT now(),
+    CONSTRAINT channel_pkey PRIMARY KEY (id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.channel
+    OWNER to postgres;
 
 -- Chat messages
 
