@@ -56,7 +56,7 @@ CREATE TABLE public.channel
     users text[] COLLATE pg_catalog."default" NOT NULL,
     created timestamp with time zone NOT NULL DEFAULT now(),
     content text COLLATE pg_catalog."default",
-    lastupdatetime time with time zone NOT NULL DEFAULT now(),
+    lastupdatetime timestamp with time zone NOT NULL DEFAULT now(),
     CONSTRAINT channel_pkey PRIMARY KEY (id)
 )
 WITH (

@@ -11,6 +11,8 @@ router.post('/registered', authController.createUser)
 router.post('/joinChannel', channelController.joinChannel)
 router.get('/getUserChannel', channelController.getUserChannel)
 
+router.post('/getUserChat', channelController.getUserChat)
+
 router.post('/sendMessage', chatController.sendMessage)
 router.post('/addFriends', usersController.addFriends)
 router.post('/delFriends', usersController.delFriends)

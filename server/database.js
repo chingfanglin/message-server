@@ -208,6 +208,26 @@ exports.getUserChannel = function(user_id, callback) {
   }, callback)
 }
 
+//搜尋使用者頻道對話紀錄
+exports.getUserChat = function(user_id, channel_id, callback) {
+  getClient(function(client, callback) {
+    client.query(
+      `SELECT u.username, cm.user_id, cm.message, cm.created
+      FROM chat_messages cm
+      JOIN users u ON u.id = cm.user_id 
+      JOIN (SELECT id, users FROM channel ) c ON $1 = ANY (c.users::int[])
+      WHERE cm.channel = $2
+      GROUP BY u.username, cm.user_id, cm.message, cm.created
+      ORDER BY cm.created`,
+      [user_id, channel_id],
+      function(err, data) {
+        var messages = data.rows
+        return callback(null, messages)
+      }
+    )
+  }, callback)
+}
+
 exports.joinChannel = function(channelName, users, callback) {
   getClient(function(client, callback) {
     //搜尋所有頻道

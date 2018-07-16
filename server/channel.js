@@ -18,3 +18,12 @@ exports.getUserChannel = function (user_id, callback) {
     callback(null, channel)
   })
 }
+
+exports.getUserChat = function (user_id, channel_id, callback) {
+  database.getUserChat(user_id, channel_id, function (err, channel) {
+    if (err) {
+      callback(err)
+    }
+    callback(null, channel)
+  })
+}
