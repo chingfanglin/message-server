@@ -144,29 +144,39 @@ exports.login = function(username, password, callback) {
 
         if (!verified) return callback('WRONG_PASSWORD', user.id)
 
-        const secret = speakeasy.generateSecret()
+        let secret = ''
+        let otpauth_url = ''
+        const generateSecret = speakeasy.generateSecret()
         const secret_key = config.SECRET_KEY
+        const mfa_secret = user.mfa_secret
+
+        if (mfa_secret){
+          secret = mfa_secret
+          otpauth_url = speakeasy.otpauthURL({
+            secret: secret,
+            label: 'LAN@email',
+            issuer: 'The Spaces Work',
+            encoding: "base32"
+          })
+        } else {
+          secret = generateSecret.base32
+          otpauth_url = generateSecret.otpauth_url
+          client.query(
+            'UPDATE users SET mfa_secret = $1 WHERE id = $2',
+            [secret, user.id],
+            function(err, data) {
+            }
+          )
+        }
         const payload = {
+          secret: secret,
+          otpauth_url: otpauth_url,
           user_id: user.id
         }
         const token = jwt.sign(payload, secret_key, {
           expiresIn: '1d' //秒到期时间
         })
-
-        try {
-          decoded = jwt.verify(token, secret_key)
-          console.log(token, secret_key, decoded)
-        } catch (e) {
-          return res.status(401).send('unauthorized')
-        }
-
-        client.query(
-          'UPDATE users SET mfa_secret = $1 WHERE id = $2',
-          [secret.base32, user.id],
-          function(err, data) {
-            callback(null, token)
-          }
-        )
+        callback(null, { token: token, isShowQR: mfa_secret === null})
       }
     )
   }, callback)

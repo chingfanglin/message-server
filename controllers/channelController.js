@@ -56,7 +56,6 @@ exports.getUserChannel = async (req, res) => {
       return res.status(401).send('unauthorized')
     }
     user = jwt.verify(authorization, secret_key)
-    
     const user_id = user.user_id
     channel.getUserChannel(user_id, function(err, channel) {
       if (err) {

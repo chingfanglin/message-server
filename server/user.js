@@ -11,12 +11,12 @@ exports.createUser = (username, password, email, callback) => {
 }
 
 exports.login = function(username, password, callback) {
-  database.login(username, password, function(err, token) {
+  database.login(username, password, function(err, data) {
     if (err) {
       if (err.code === '23505') return callback('user-name-taken')
       else return callback(err)
     }
-    return callback(null, token)
+    return callback(null, data)
   })
 }
 

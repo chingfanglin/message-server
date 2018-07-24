@@ -7,6 +7,9 @@ const channelController = require('../controllers/channelController')
 const chatController = require('../controllers/chatController')
 
 router.post('/login', authController.login)
+router.post('/createSecretQRCode', authController.createSecretQRCode)
+router.post('/verificationAuthenticator', authController.verificationAuthenticator)
+
 router.post('/registered', authController.createUser)
 router.post('/joinChannel', channelController.joinChannel)
 router.get('/getUserChannel', channelController.getUserChannel)
